@@ -1,90 +1,16 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(state_kiro
-  VERSION      1.0.0.0
-  DESCRIPTION  "Stream proof state indicator for sekiro"
-)
-
-if(MSVC)
-  enable_language(ASM_MASM)
-endif()
+project(statekiro)
 
 option(ENABLE_LTO "Enable Link Time Optimization" ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "" FORCE)
 
+add_subdirectory(statekiro-lib)
+add_subdirectory(statekiro-console)
+
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release CACHE STRING "Set build type (Debug;Release;RelWithDebInfo;MinSizeRel)")
   message(NOTICE "No build type specified, defaulting to '${CMAKE_BUILD_TYPE}' build.")
-endif()
-
-include(FetchContent)
-
-FetchContent_Declare(fmt
-  GIT_REPOSITORY https://github.com/fmtlib/fmt
-  GIT_TAG        9.0.0
-  GIT_SHALLOW    TRUE
-)
-
-FetchContent_Declare(minhook
-  GIT_REPOSITORY https://github.com/TsudaKageyu/minhook
-  GIT_TAG        origin/master
-  GIT_SHALLOW    TRUE
-)
-
-FetchContent_MakeAvailable(fmt minhook)
-
-add_library(${PROJECT_NAME} SHARED
-  src/main.cpp
-
-  src/utils/utils.cpp
-
-  src/hooks/hooks.cpp
-  src/hooks/detour.cpp
-  src/hooks/functions/get_current_health.cpp
-  src/hooks/functions/get_current_posture.cpp
-  src/hooks/functions/get_max_health.cpp
-  src/hooks/functions/get_max_posture.cpp
-  src/hooks/functions/present.cpp
-  $<$<CXX_COMPILER_ID:MSVC>:src/hooks/functions/read_r10.asm>
-  src/hooks/functions/sub_140E302B0.cpp
-
-)
-
-set_target_properties(${PROJECT_NAME} PROPERTIES
-  USE_FOLDERS               ON
-  CXX_EXTENSIONS            OFF
-  RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_SOURCE_DIR}/_out
-)
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
-target_compile_options(${PROJECT_NAME} PRIVATE
-  $<$<CXX_COMPILER_ID:MSVC>:/W4>
-  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic>
-)
-target_link_libraries(${PROJECT_NAME} PRIVATE 
-  dxguid
-  minhook
-  fmt::fmt
-)
-
-if(ENABLE_LTO)
-  include(CheckIPOSupported)
-  check_ipo_supported(RESULT LTO_AVAILABLE OUTPUT LTO_ERROR)
-
-  if(LTO_AVAILABLE)
-    set_target_properties(${PROJECT_NAME} PROPERTIES
-      INTERPROCEDURAL_OPTIMIZATION_RELEASE         ON
-      INTERPROCEDURAL_OPTIMIZATION_RELWITHDEBINFO  ON
-    )
-  else()
-    message(FATAL_ERROR "Failed to enable LTO!\n${LTO_ERROR}")
-  endif()
-endif()
-
-if(WIN32)
-  string(TIMESTAMP CURRENT_YEAR "%Y")
-  set(USERNAME $ENV{USERNAME} CACHE STRING "Username")
-  configure_file(src/version.rc.in ${CMAKE_BINARY_DIR}/version.rc @ONLY)
-  target_sources(${PROJECT_NAME} PRIVATE ${CMAKE_BINARY_DIR}/version.rc)
 endif()
 
 # Note:
