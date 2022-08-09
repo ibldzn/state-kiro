@@ -34,6 +34,7 @@ add_library(${PROJECT_NAME} STATIC
 
 target_include_directories(${PROJECT_NAME}
   PRIVATE
+    src
     include/statekiro
   INTERFACE
     include

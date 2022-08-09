@@ -1,5 +1,5 @@
-#include "../../globals.hpp"
-#include "../hooks.hpp"
+#include <globals.hpp>
+#include <hooks/hooks.hpp>
 
 unsigned int Hooks::hk_get_max_posture(void* rcx)
 {

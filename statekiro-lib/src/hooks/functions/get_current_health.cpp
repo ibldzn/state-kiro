@@ -1,6 +1,6 @@
-#include "../../globals.hpp"
-#include "../../utils/utils.hpp"
-#include "../hooks.hpp"
+#include <globals.hpp>
+#include <hooks/hooks.hpp>
+#include <utils/utils.hpp>
 
 #include <intrin.h>
 #define WIN32_LEAN_AND_MEAN

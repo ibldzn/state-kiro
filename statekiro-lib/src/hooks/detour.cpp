@@ -1,6 +1,6 @@
-#include "detour.hpp"
 #include <MinHook.h>
 #include <atomic>
+#include <hooks/detour.hpp>
 
 static std::atomic_size_t ref_count = 0;
 

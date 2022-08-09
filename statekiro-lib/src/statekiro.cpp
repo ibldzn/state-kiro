@@ -1,5 +1,6 @@
 #include "globals.hpp"
 #include "hooks/hooks.hpp"
+#include <mutex>
 #include <statekiro.hpp>
 
 bool statekiro::initialize()
@@ -40,4 +41,11 @@ std::string statekiro::get_current_prosthetic()
 std::string statekiro::get_current_quick_item()
 {
     return globals::current_quick_item;
+}
+
+void statekiro::register_present_callback(statekiro::present_callback_t callback)
+{
+    static std::mutex mtx;
+    std::lock_guard lock(mtx);
+    globals::presents_callbacks.emplace_back(std::move(callback));
 }

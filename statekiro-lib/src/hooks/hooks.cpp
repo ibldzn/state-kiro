@@ -1,5 +1,5 @@
-#include "hooks.hpp"
-#include "../utils/utils.hpp"
+#include <hooks/hooks.hpp>
+#include <utils/utils.hpp>
 
 #define WIN32_LEAN_AND_MEAN
 #include <d3d11.h>
@@ -20,71 +20,29 @@ bool Hooks::initialize()
     const auto scan_begin = sekiro + nt->OptionalHeader.BaseOfCode;
     const auto scan_size = nt->OptionalHeader.SizeOfCode;
 
-    if (!m_dtr_get_current_health
-             .create(
-                 utils::pattern_scan(
-                     scan_begin,
-                     scan_size,
-                     "E8 ? ? ? ? 8B 0E 3B C8"
-                 )
-                     .self_jmp(),
-                 reinterpret_cast<void*>(hk_get_current_health)
-             )) {
+#define MAKE_HOOK(name, pattern, after) (m_dtr_##name.create(utils::pattern_scan(scan_begin, scan_size, pattern) after, reinterpret_cast<void*>(hk_##name)))
+
+    if (!MAKE_HOOK(get_current_health, "E8 ? ? ? ? 8B 0E 3B C8", .self_jmp())) {
         return false;
     }
 
-    if (!m_dtr_get_current_posture
-             .create(
-                 utils::pattern_scan(
-                     scan_begin,
-                     scan_size,
-                     "E8 ? ? ? ? 8B 4F 38 3B C1"
-                 )
-                     .self_jmp(),
-                 reinterpret_cast<void*>(hk_get_current_posture)
-             )) {
+    if (!MAKE_HOOK(get_current_posture, "E8 ? ? ? ? 8B 4F 38 3B C1", .self_jmp())) {
         return false;
     }
 
-    if (!m_dtr_get_max_health
-             .create(
-                 utils::pattern_scan(
-                     scan_begin,
-                     scan_size,
-                     "E8 ? ? ? ? 89 46 1C 8B D0"
-                 )
-                     .self_jmp(),
-                 reinterpret_cast<void*>(hk_get_max_health)
-             )) {
+    if (!MAKE_HOOK(get_max_health, "E8 ? ? ? ? 89 46 1C 8B D0", .self_jmp())) {
         return false;
     }
 
-    if (!m_dtr_get_max_posture
-             .create(
-                 utils::pattern_scan(
-                     scan_begin,
-                     scan_size,
-                     "E8 ? ? ? ? 89 46 38"
-                 )
-                     .self_jmp(),
-                 reinterpret_cast<void*>(hk_get_max_posture)
-             )) {
+    if (!MAKE_HOOK(get_max_posture, "E8 ? ? ? ? 89 46 38", .self_jmp())) {
         return false;
     }
 
-    if (!m_dtr_sub_140E302B0
-             .create(
-                 utils::pattern_scan(
-                     scan_begin,
-                     scan_size,
-                     "41 0F 94 C1 48 8D 45 A7"
-                 )
-                     .self_offset(0x34)
-                     .self_jmp(),
-                 reinterpret_cast<void*>(hk_sub_140E302B0)
-             )) {
+    if (!MAKE_HOOK(sub_140E302B0, "41 0F 94 C1 48 8D 45 A7", .self_offset(0x34).self_jmp())) {
         return false;
     }
+
+#undef MAKE_HOOK
 
     if (!hook_present(true) && !hook_present(false)) {
         return false;

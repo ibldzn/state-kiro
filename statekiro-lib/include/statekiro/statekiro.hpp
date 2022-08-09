@@ -6,6 +6,8 @@
 extern "C" struct IDXGISwapChain;
 
 namespace statekiro {
+    using present_callback_t = std::function<void(IDXGISwapChain*)>;
+
     bool initialize();
     void uninitialize();
 
@@ -18,5 +20,5 @@ namespace statekiro {
     std::string get_current_prosthetic();
     std::string get_current_quick_item();
 
-    void register_present_callback(std::function<void(IDXGISwapChain*)> callback);
+    void register_present_callback(present_callback_t callback);
 }

@@ -1,12 +1,12 @@
 #pragma once
 
-#include "../pointer.hpp"
-#include "../singleton.hpp"
-#include "detour.hpp"
+#include <hooks/detour.hpp>
+#include <pointer.hpp>
+#include <utils/singleton.hpp>
 
 struct IDXGISwapChain;
 
-struct Hooks : Singleton<Hooks> {
+struct Hooks : utils::Singleton<Hooks> {
     bool initialize();
     void shutdown();
 
