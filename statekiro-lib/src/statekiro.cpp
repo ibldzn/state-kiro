@@ -3,14 +3,12 @@
 #include <mutex>
 #include <statekiro.hpp>
 
+static std::vector<statekiro::present_callback_t> presents_callbacks = {};
+
 bool statekiro::initialize()
 {
-    return Hooks::instance().initialize();
-}
-
-void statekiro::uninitialize()
-{
-    Hooks::instance().shutdown();
+    static const bool once = [] { return Hooks::instance().initialize(); }();
+    return once;
 }
 
 unsigned int statekiro::get_max_health()
@@ -47,5 +45,10 @@ void statekiro::register_present_callback(statekiro::present_callback_t callback
 {
     static std::mutex mtx;
     std::lock_guard lock(mtx);
-    globals::presents_callbacks.emplace_back(std::move(callback));
+    presents_callbacks.emplace_back(std::move(callback));
+}
+
+const std::vector<statekiro::present_callback_t>& statekiro::get_present_callbacks()
+{
+    return presents_callbacks;
 }

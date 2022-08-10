@@ -8,11 +8,11 @@ struct IDXGISwapChain;
 
 struct Hooks : utils::Singleton<Hooks> {
     bool initialize();
-    void shutdown();
 
 private:
     friend struct Singleton<Hooks>;
     Hooks() = default;
+    ~Hooks();
     bool hook_present(bool stream_proof);
     void unhook_present();
 

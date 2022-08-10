@@ -14,6 +14,4 @@ namespace globals {
 
     inline std::string current_quick_item = {};
     inline std::string current_prosthetic = {};
-
-    inline std::vector<statekiro::present_callback_t> presents_callbacks = {};
 }

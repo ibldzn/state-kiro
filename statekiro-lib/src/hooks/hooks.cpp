@@ -7,6 +7,19 @@
 
 static Pointer get_dxgi_present();
 
+Hooks::~Hooks()
+{
+    unhook_present();
+
+    m_dtr_get_current_health.remove();
+    m_dtr_get_current_posture.remove();
+
+    m_dtr_get_max_health.remove();
+    m_dtr_get_max_posture.remove();
+
+    m_dtr_sub_140E302B0.remove();
+}
+
 bool Hooks::initialize()
 {
     const auto sekiro = reinterpret_cast<std::uint8_t*>(GetModuleHandleA(nullptr));
@@ -49,19 +62,6 @@ bool Hooks::initialize()
     }
 
     return true;
-}
-
-void Hooks::shutdown()
-{
-    unhook_present();
-
-    m_dtr_get_current_health.remove();
-    m_dtr_get_current_posture.remove();
-
-    m_dtr_get_max_health.remove();
-    m_dtr_get_max_posture.remove();
-
-    m_dtr_sub_140E302B0.remove();
 }
 
 bool Hooks::hook_present(bool stream_proof)

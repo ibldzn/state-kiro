@@ -12,6 +12,6 @@ target_compile_options(${PROJECT_NAME}
     $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic>
 )
 target_link_libraries(${PROJECT_NAME}
-  PRIVATE 
+  PRIVATE
     statekiro_lib
 )
