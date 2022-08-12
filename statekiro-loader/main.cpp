@@ -153,7 +153,7 @@ int main()
         return 1;
     }
 
-    fmt::print("{}\n", fmt::format(fmt::fg(fmt::color::green), "[✓] DLL injected successfully!"));
+    fmt::print(fmt::fg(fmt::color::green), "[✓] DLL injected successfully!");
 
     Sleep(3000);
 }
