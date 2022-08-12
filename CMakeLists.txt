@@ -4,9 +4,11 @@ project(statekiro)
 
 option(ENABLE_LTO "Enable Link Time Optimization" ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "" FORCE)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/_out)
 
 add_subdirectory(statekiro-lib)
 add_subdirectory(statekiro-imgui)
+add_subdirectory(statekiro-loader)
 add_subdirectory(statekiro-console)
 
 if(NOT CMAKE_BUILD_TYPE)

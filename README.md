@@ -17,7 +17,7 @@ On the left is what you'll see (the yellow thingy, the one in the middle, and th
 
 - Start Discord (Optional, if you don't start Discord and enable game overlay OBS will see the same thing you see on screen)
 - Start Sekiro
-- Inject the DLL (statekiro-imgui.dll)
+- Run the loader
 - Start OBS
 
 # Compiling
