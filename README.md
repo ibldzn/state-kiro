@@ -20,9 +20,22 @@ On the left is what you'll see (the yellow thingy, the one in the middle, and th
 - Run the loader
 - Start OBS
 
+If you're using the imgui version then you can press `F1` to toggle the menu.  
+Press `DEL` to unload the mod.
+
+# Project Structure
+
+- `statekiro-lib`: The core functionality of the mod, this is the one responsible for interacting directly with the game's memory and provide APIs to access the game's data
+
+- `statekiro-console`: Console interface of the mod, useful if you want to record some gameplay without the HUDs but don't want to install discord
+
+- `statekiro-imgui`: ImGui interface of the mod, it renders thing inside the game. You need to have discord installed if you don't want the mod appearing on your OBS
+
+- `statekiro-loader`: Mod loader
+
 # Compiling
 
-## Deps
+## Prerequisites
 
 - CMake
 - C++20 Compiler
