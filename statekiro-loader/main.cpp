@@ -24,6 +24,7 @@ static std::optional<unsigned int> get_process_id(const char* exe_name)
     if (snapshot == INVALID_HANDLE_VALUE) {
         return std::nullopt;
     }
+
     DEFER { CloseHandle(snapshot); };
 
     PROCESSENTRY32 entry { .dwSize = sizeof(PROCESSENTRY32) };
@@ -53,6 +54,7 @@ static bool inject_dll(unsigned int process_id, std::string_view dll_path)
     if (!handle) {
         return false;
     }
+
     DEFER { CloseHandle(handle); };
 
     LPVOID remote_dll_path {
@@ -195,5 +197,5 @@ int main()
         return 1;
     }
 
-    print(fmt::color::green, "[✓] DLL injected successfully!");
+    print(fmt::color::green, "[✓] DLL injected successfully!\n");
 }
