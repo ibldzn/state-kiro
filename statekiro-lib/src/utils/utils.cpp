@@ -1,4 +1,5 @@
 #include "utils.hpp"
+#include <algorithm>
 #include <cstdlib>
 #include <optional>
 
@@ -44,29 +45,19 @@ Pointer utils::pattern_scan(Pointer begin, std::size_t size, std::string_view pa
         return {};
     }
 
-    const auto end = begin.as<const std::uint8_t*>() + size;
-
-    for (; begin != end; begin.self_offset(1)) {
-        bool found = true;
-
-        for (std::size_t i = 0; i < bytes.size(); ++i) {
-            if (begin.offset(i) == end) {
-                return {};
-            }
-
-            const auto& byte = bytes[i];
-            if (byte.has_value() && *byte != begin.offset(i).as<const std::uint8_t&>()) {
-                found = false;
-                break;
-            }
+    const auto start = begin.as<const std::uint8_t*>();
+    const auto end = start + size;
+    const auto ret = std::search(
+        start,
+        end,
+        bytes.cbegin(),
+        bytes.cend(),
+        [](std::uint8_t a, std::optional<std::uint8_t> b) {
+            return !b.has_value() || a == *b;
         }
+    );
 
-        if (found) {
-            return begin;
-        }
-    }
-
-    return {};
+    return ret == end ? nullptr : ret;
 }
 
 std::vector<std::optional<std::uint8_t>> utils::pattern_to_bytes(std::string_view pattern)
