@@ -135,16 +135,14 @@ int main([[maybe_unused]] int argc, char** argv)
 
     const auto println = [&]<typename... Args>(fmt::color fg, std::string_view format_str, Args&&... args) {
         if (have_color) {
-            // feels like a hack but whatever
-            const auto str = fmt::format(
+            fmt::print(
                 fmt::fg(fg),
-                "{}",
+                "{}\n",
                 fmt::format(
                     fmt::runtime(format_str),
                     std::forward<Args>(args)...
                 )
             );
-            fmt::print("{}\n", str);
         } else {
             fmt::print(
                 "{}\n",
@@ -158,16 +156,15 @@ int main([[maybe_unused]] int argc, char** argv)
 
     const auto eprintln = [&]<typename... Args>(fmt::color fg, std::string_view format_str, Args&&... args) {
         if (have_color) {
-            // feels like a hack but whatever
-            const auto str = fmt::format(
+            fmt::print(
+                stderr,
                 fmt::fg(fg),
-                "{}",
+                "{}\n",
                 fmt::format(
                     fmt::runtime(format_str),
                     std::forward<Args>(args)...
                 )
             );
-            fmt::print(stderr, "{}\n", str);
         } else {
             fmt::print(
                 stderr,
