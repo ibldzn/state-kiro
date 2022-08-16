@@ -1,5 +1,5 @@
-#include "globals.hpp"
-#include "hooks/hooks.hpp"
+#include <globals.hpp>
+#include <hooks/hooks.hpp>
 #include <mutex>
 #include <statekiro.hpp>
 

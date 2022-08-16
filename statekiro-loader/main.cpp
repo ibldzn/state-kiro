@@ -1,6 +1,5 @@
 #include "defer.hpp"
 
-#include <array>
 #include <filesystem>
 #include <fmt/color.h>
 #include <fmt/core.h>
@@ -9,6 +8,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <vector>
 
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
@@ -127,56 +127,108 @@ static bool enable_cmd_esc_sequence(DWORD handle)
     return true;
 }
 
-int main()
+int main([[maybe_unused]] int argc, char** argv)
 {
     DEFER { Sleep(3000); };
 
     const bool have_color = enable_cmd_esc_sequence(STD_OUTPUT_HANDLE) && enable_cmd_esc_sequence(STD_ERROR_HANDLE);
 
-    const auto print = [&](fmt::color fg, std::string_view str) {
+    const auto println = [&]<typename... Args>(fmt::color fg, std::string_view format_str, Args&&... args) {
         if (have_color) {
-            fmt::print(fmt::fg(fg), "{}", str);
+            // feels like a hack but whatever
+            const auto str = fmt::format(
+                fmt::fg(fg),
+                "{}",
+                fmt::format(
+                    fmt::runtime(format_str),
+                    std::forward<Args>(args)...
+                )
+            );
+            fmt::print("{}\n", str);
         } else {
-            fmt::print("{}", str);
+            fmt::print(
+                "{}\n",
+                fmt::format(
+                    fmt::runtime(format_str),
+                    std::forward<Args>(args)...
+                )
+            );
         }
     };
 
-    const auto eprint = [&](fmt::color fg, std::string_view str) {
+    const auto eprintln = [&]<typename... Args>(fmt::color fg, std::string_view format_str, Args&&... args) {
         if (have_color) {
-            fmt::print(stderr, fmt::fg(fg), "{}", str);
+            // feels like a hack but whatever
+            const auto str = fmt::format(
+                fmt::fg(fg),
+                "{}",
+                fmt::format(
+                    fmt::runtime(format_str),
+                    std::forward<Args>(args)...
+                )
+            );
+            fmt::print(stderr, "{}\n", str);
         } else {
-            fmt::print(stderr, "{}", str);
+            fmt::print(
+                stderr,
+                "{}\n",
+                fmt::format(
+                    fmt::runtime(format_str),
+                    std::forward<Args>(args)...
+                )
+            );
         }
     };
+
+    println(fmt::color::alice_blue, "[+] Looking for Sekiro...");
 
     const auto sekiro = get_process_id("sekiro.exe");
     if (!sekiro.has_value()) {
-        eprint(fmt::color::red, "[!] Sekiro is not running! Aborting..\n");
+        eprintln(fmt::color::red, "[!] Sekiro is not running! Aborting..");
+        return 1;
+    } else {
+        println(fmt::color::alice_blue, "[+] Found Sekiro with PID: {}", *sekiro);
+    }
+
+    println(fmt::color::alice_blue, "[+] Looking for Discord...");
+
+    if (const auto discord = get_process_id("Discord.exe"); !discord.has_value()) {
+        eprintln(fmt::color::yellow, "[!] Discord is not running, continuing anyway..");
+    } else {
+        println(fmt::color::alice_blue, "[+] Found Discord with PID: {}", *discord);
+    }
+
+    println(fmt::color::alice_blue, "[+] Looking for DLLs in the executable directory...");
+
+    const auto DLLS = [&] {
+        std::vector<fs::path> ret;
+        for (const auto& entry : fs::directory_iterator(fs::path(argv[0]).parent_path())) {
+            const auto& path = entry.path();
+            if (path.has_extension() && path.extension() == ".dll") {
+                ret.emplace_back(path);
+            }
+        }
+        return ret;
+    }();
+
+    if (DLLS.empty()) {
+        eprintln(fmt::color::red, "[!] Failed to find DLLs, make sure they are in the same directory as the executable!");
         return 1;
     }
 
-    if (!get_process_id("Discord.exe").has_value()) {
-        eprint(fmt::color::yellow, "[!] Discord is not running, continuing anyway..\n");
-    }
-
-    constexpr std::array DLLS = {
-        "statekiro_imgui.dll",
-        "statekiro_console.dll",
-    };
-
-    for (std::size_t i = 0; const auto dll : DLLS) {
-        print(fmt::color::blue, fmt::format("[{}] {}\n", ++i, dll));
+    for (std::size_t i = 0; const auto& dll : DLLS) {
+        println(fmt::color::blue, "[{}] {}", ++i, dll.filename().string());
     }
 
     const auto dll = [&] {
         while (true) {
-            print(fmt::color::blue, "Choose DLL to inject: ");
+            println(fmt::color::blue, "Choose DLL to inject: ");
 
             std::size_t choice = 0;
             std::cin >> choice;
 
             if (std::cin.fail() || choice == 0 || choice - 1 >= DLLS.size()) {
-                eprint(fmt::color::red, "[!] Invalid choice!\n");
+                eprintln(fmt::color::red, "[!] Invalid choice!");
                 std::cin.clear();
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             } else {
@@ -186,16 +238,12 @@ int main()
         }
     }();
 
-    if (!fs::exists(dll)) {
-        print(fmt::color::red, fmt::format("[!] \"{}\" does not exists. ", dll));
-        print(fmt::color::red, "Please make sure the DLL is in the same directory as the executable.\n");
+    println(fmt::color::alice_blue, "[+] Injecting \"{}\"...", dll.filename().string());
+
+    if (!inject_dll(*sekiro, dll.string())) {
+        eprintln(fmt::color::red, "[!] Failed to inject DLL! Aborting..\n");
         return 1;
     }
 
-    if (!inject_dll(*sekiro, dll)) {
-        print(fmt::color::red, "[!] Failed to inject DLL! Aborting..\n");
-        return 1;
-    }
-
-    print(fmt::color::green, "[✓] DLL injected successfully!\n");
+    println(fmt::color::green, "[✓] DLL injected successfully!\n");
 }
